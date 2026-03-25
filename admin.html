@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Admin Panel</title>
+
+<style>
+body {
+    font-family: Arial;
+    text-align: center;
+    background: #f4f4f4;
+}
+
+table {
+    margin: auto;
+    border-collapse: collapse;
+    width: 80%;
+    background: white;
+}
+
+th, td {
+    border: 1px solid black;
+    padding: 10px;
+}
+
+th {
+    background: green;
+    color: white;
+}
+</style>
+</head>
+
+<body>
+
+<h2>All Users Data</h2>
+
+<table>
+<tr>
+    <th>Key</th>
+    <th>Value</th>
+</tr>
+
+<tbody id="data"></tbody>
+</table>
+
+<br>
+<button onclick="logout()">Logout</button>
+
+<script>
+let table = document.getElementById("data");
+
+for(let i = 0; i < localStorage.length; i++) {
+    let key = localStorage.key(i);
+    let value = localStorage.getItem(key);
+
+    table.innerHTML += `
+    <tr>
+        <td>${key}</td>
+        <td>${value}</td>
+    </tr>`;
+}
+
+function logout() {
+    window.location.href = "index.html";
+}
+</script>
+
+</body>
+</html>

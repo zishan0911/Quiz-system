@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Quiz Dashboard</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial;
+    background: #f4f6f9;
+}
+
+/* Top Bar */
+.topbar {
+    background: #2f3542;
+    color: white;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.logout {
+    background: #00a8ff;
+    padding: 8px 15px;
+    border: none;
+    color: white;
+    cursor: pointer;
+}
+
+/* Cards */
+.dashboard {
+    display: flex;
+    justify-content: space-around;
+    margin: 40px;
+    flex-wrap: wrap;
+}
+
+.card {
+    width: 200px;
+    padding: 20px;
+    margin: 10px;
+    color: white;
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: center;
+}
+
+.gk { background: teal; }
+.math { background: #6c5ce7; }
+.ds { background: #e17055; }
+.cn { background: #2d3436; }
+.dbms { background: #00b894; }
+
+/* Quiz Box */
+#quizBox {
+    display: none;
+    text-align: center;
+}
+
+button {
+    padding: 10px;
+    margin: 5px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+    <h2>ONLINE QUIZ</h2>
+    <button class="logout" onclick="logout()">Logout</button>
+</div>
+
+<h2 style="text-align:center;">Dashboard</h2>
+
+<div class="dashboard" id="dashboard">
+    <div class="card gk" onclick="startQuiz('gk')">Knowledge Quiz</div>
+    <div class="card math" onclick="startQuiz('math')">Maths Quiz</div>
+    <div class="card ds" onclick="startQuiz('ds')">Data Structure</div>
+    <div class="card cn" onclick="startQuiz('cn')">Networking</div>
+    <div class="card dbms" onclick="startQuiz('dbms')">DBMS</div>
+</div>
+
+<!-- Quiz -->
+<div id="quizBox">
+    <h3 id="question"></h3>
+    <div id="options"></div>
+    <button onclick="nextQuestion()">Next</button>
+</div>
+
+<script>
+let user = localStorage.getItem("currentUser");
+
+let quizzes = {
+
+gk: [
+{q:"Capital of India?", o:["Delhi","Mumbai","Pune","Goa"], a:"Delhi"},
+{q:"2+2=?", o:["2","3","4","5"], a:"4"},
+{q:"Sun rises from?", o:["West","East","North","South"], a:"East"},
+{q:"National animal?", o:["Tiger","Lion","Dog","Cat"], a:"Tiger"},
+{q:"Water formula?", o:["H2O","CO2","O2","NaCl"], a:"H2O"},
+{q:"Earth shape?", o:["Flat","Round","Square","Triangle"], a:"Round"},
+{q:"India PM?", o:["Modi","Rahul","Obama","Trump"], a:"Modi"},
+{q:"Largest ocean?", o:["Indian","Pacific","Atlantic","Arctic"], a:"Pacific"},
+{q:"Colors in flag?", o:["3","2","4","5"], a:"3"},
+{q:"1+1=?", o:["1","2","3","4"], a:"2"}
+],
+
+math: [
+{q:"5+5=?", o:["8","9","10","11"], a:"10"},
+{q:"10-2=?", o:["6","7","8","9"], a:"8"},
+{q:"3*3=?", o:["6","9","12","3"], a:"9"},
+{q:"12/4=?", o:["2","3","4","5"], a:"3"},
+{q:"7+3=?", o:["9","10","11","12"], a:"10"},
+{q:"9-5=?", o:["2","3","4","5"], a:"4"},
+{q:"6*2=?", o:["10","11","12","13"], a:"12"},
+{q:"8/2=?", o:["2","3","4","5"], a:"4"},
+{q:"15-10=?", o:["3","4","5","6"], a:"5"},
+{q:"2*5=?", o:["5","10","15","20"], a:"10"}
+],
+
+ds: [
+{q:"Stack follows?", o:["FIFO","LIFO","Tree","Graph"], a:"LIFO"},
+{q:"Queue follows?", o:["LIFO","FIFO","Stack","Tree"], a:"FIFO"},
+{q:"Array is?", o:["Linear","Tree","Graph","None"], a:"Linear"},
+{q:"Binary tree max children?", o:["1","2","3","4"], a:"2"},
+{q:"Linked list uses?", o:["Pointers","Array","Stack","Queue"], a:"Pointers"},
+{q:"Stack operations?", o:["Push Pop","Insert Delete","Add Remove","None"], a:"Push Pop"},
+{q:"Queue operations?", o:["Enqueue Dequeue","Push Pop","Insert Delete","None"], a:"Enqueue Dequeue"},
+{q:"Tree is?", o:["Non-linear","Linear","Array","Stack"], a:"Non-linear"},
+{q:"Graph consists of?", o:["Nodes edges","Arrays","Stack","Queue"], a:"Nodes edges"},
+{q:"Searching method?", o:["Binary search","Push","Pop","Insert"], a:"Binary search"}
+],
+
+cn: [
+{q:"OSI layers?", o:["7","5","3","2"], a:"7"},
+{q:"IP stands for?", o:["Internet Protocol","Internal Process","Input Port","None"], a:"Internet Protocol"},
+{q:"HTTP is?", o:["Protocol","Language","Software","Hardware"], a:"Protocol"},
+{q:"Router works on?", o:["Network layer","Physical","Transport","Session"], a:"Network layer"},
+{q:"MAC address is?", o:["Physical address","IP","Logical","None"], a:"Physical address"},
+{q:"TCP is?", o:["Protocol","Language","Device","None"], a:"Protocol"},
+{q:"Switch works on?", o:["Data link","Network","Transport","Session"], a:"Data link"},
+{q:"DNS full form?", o:["Domain Name System","Data Network","Device Name","None"], a:"Domain Name System"},
+{q:"LAN stands for?", o:["Local Area Network","Large Network","Line Area","None"], a:"Local Area Network"},
+{q:"Firewall is?", o:["Security","Hardware","Software","None"], a:"Security"}
+],
+
+dbms: [
+{q:"DBMS stands for?", o:["Database Mgmt System","Data Base System","Both","None"], a:"Both"},
+{q:"Primary key?", o:["Unique","Duplicate","Null","None"], a:"Unique"},
+{q:"SQL is?", o:["Language","Software","Hardware","None"], a:"Language"},
+{q:"Table is?", o:["Rows columns","Only rows","Only columns","None"], a:"Rows columns"},
+{q:"Foreign key?", o:["Reference key","Primary","Unique","None"], a:"Reference key"},
+{q:"Normalization?", o:["Reduce redundancy","Increase data","Delete","None"], a:"Reduce redundancy"},
+{q:"ER model?", o:["Diagram","Table","Query","None"], a:"Diagram"},
+{q:"Tuple is?", o:["Row","Column","Table","None"], a:"Row"},
+{q:"Attribute?", o:["Column","Row","Key","None"], a:"Column"},
+{q:"Database?", o:["Collection of data","Single data","File","None"], a:"Collection of data"}
+]
+
+};
+
+let currentQuiz = [];
+let index = 0;
+let score = 0;
+let correct = 0;
+let wrong = 0;
+let selected = "";
+
+function startQuiz(type) {
+    currentQuiz = quizzes[type];
+    index = 0;
+    score = 0;
+    correct = 0;
+    wrong = 0;
+
+    document.getElementById("dashboard").style.display = "none";
+    document.getElementById("quizBox").style.display = "block";
+
+    loadQuestion();
+}
+
+function loadQuestion() {
+    let q = currentQuiz[index];
+    document.getElementById("question").innerText = q.q;
+
+    let html = "";
+    q.o.forEach(opt => {
+        html += `<button onclick="selectAnswer('${opt}')">${opt}</button><br>`;
+    });
+
+    document.getElementById("options").innerHTML = html;
+}
+
+function selectAnswer(ans) {
+    selected = ans;
+}
+
+function nextQuestion() {
+    if(selected === "") {
+        alert("Select an answer!");
+        return;
+    }
+
+    let correctAns = currentQuiz[index].a;
+
+    if(selected === correctAns) {
+        score += 2;
+        correct++;
+    } else {
+        wrong++;
+    }
+
+    index++;
+    selected = "";
+
+    if(index < currentQuiz.length) {
+        loadQuestion();
+    } else {
+        finishQuiz();
+    }
+}
+
+function finishQuiz() {
+    alert("Correct: " + correct + " Wrong: " + wrong + " Score: " + score);
+
+    localStorage.setItem(user+"_result", 
+        "Correct:"+correct+" Wrong:"+wrong+" Score:"+score);
+
+    document.getElementById("quizBox").style.display = "none";
+    document.getElementById("dashboard").style.display = "flex";
+}
+
+function logout() {
+    localStorage.removeItem("currentUser");
+    window.location.href = "index.html";
+}
+</script>
+
+</body>
+</html>
